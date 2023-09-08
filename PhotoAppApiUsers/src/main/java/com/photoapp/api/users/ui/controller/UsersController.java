@@ -81,12 +81,12 @@ public class UsersController {
         */
 
         //Usage of Feign client
-        List<AlbumResponseModel> albums = null;
-        try {
+        List<AlbumResponseModel> albums = albumsServiceClient.getAlbums(userId);
+        /*try {
             albums = albumsServiceClient.getAlbums(userId);
         } catch (FeignException e) {
             log.error(e.getMessage());
-        }
+        }*/
         user.setAlbums(albums);
         return ResponseEntity.ok().body(
                 new ModelMapper().map(user, UserResponseModel.class)

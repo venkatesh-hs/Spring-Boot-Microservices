@@ -1,5 +1,6 @@
 package com.photoapp.api.users;
 
+import com.photoapp.api.users.shared.FeignErrorDecoder;
 import feign.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.trace.http.HttpTraceRepository;
@@ -40,6 +41,11 @@ public class PhotoAppApiUsersApplication {
 	@Bean
 	Logger.Level getFeignLoggerLevel() {
 		return Logger.Level.FULL;
+	}
+
+	@Bean
+	public FeignErrorDecoder getFeignErrorDecoder() {
+		return new FeignErrorDecoder();
 	}
 
 }
