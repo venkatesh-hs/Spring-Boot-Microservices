@@ -7,6 +7,8 @@ import com.photoapp.api.users.ui.model.AlbumResponseModel;
 import com.photoapp.api.users.ui.model.CreateUserRequestModel;
 import com.photoapp.api.users.ui.model.CreateUserResponseModel;
 import com.photoapp.api.users.ui.model.UserResponseModel;
+import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,7 @@ import java.util.Objects;
 @RequestMapping("/users")
 @Consumes(value = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 @Produces(value = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+@Slf4j
 public class UsersController {
 
     @Autowired
@@ -78,7 +81,12 @@ public class UsersController {
         */
 
         //Usage of Feign client
-        List<AlbumResponseModel> albums = albumsServiceClient.getAlbums(userId);
+        List<AlbumResponseModel> albums = null;
+        try {
+            albums = albumsServiceClient.getAlbums(userId);
+        } catch (FeignException e) {
+            log.error(e.getMessage());
+        }
         user.setAlbums(albums);
         return ResponseEntity.ok().body(
                 new ModelMapper().map(user, UserResponseModel.class)
