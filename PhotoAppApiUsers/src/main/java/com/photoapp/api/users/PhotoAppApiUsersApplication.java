@@ -1,5 +1,6 @@
 package com.photoapp.api.users;
 
+import feign.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.trace.http.HttpTraceRepository;
 import org.springframework.boot.actuate.trace.http.InMemoryHttpTraceRepository;
@@ -34,6 +35,11 @@ public class PhotoAppApiUsersApplication {
 	@LoadBalanced
 	public RestTemplate getRestTemplate() {
 		return new RestTemplate();
+	}
+
+	@Bean
+	Logger.Level getFeignLoggerLevel() {
+		return Logger.Level.FULL;
 	}
 
 }
