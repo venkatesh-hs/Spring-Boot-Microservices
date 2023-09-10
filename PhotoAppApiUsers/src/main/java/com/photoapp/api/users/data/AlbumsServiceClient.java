@@ -1,25 +1,29 @@
 package com.photoapp.api.users.data;
 
 import com.photoapp.api.users.ui.model.AlbumResponseModel;
-import feign.FeignException;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.openfeign.FallbackFactory;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.Collections;
 import java.util.List;
 
-@FeignClient(name = "albums-ws", fallbackFactory = AlbumsFallbackFactory.class)
+//@FeignClient(name = "albums-ws", fallbackFactory = AlbumsFallbackFactory.class)
+@FeignClient(name = "albums-ws")
 public interface AlbumsServiceClient {
     @GetMapping("/users/{id}/albums")
+    @CircuitBreaker(name = "albums-ws", fallbackMethod = "getAlbumsFallback")
     List<AlbumResponseModel> getAlbums(@PathVariable String id);
+
+    default List<AlbumResponseModel> getAlbumsFallback(String id, Throwable exception) {
+        System.out.println("userId : " + id);
+        System.out.println("Exception from getAlbumsFallback : " + exception.getMessage());
+        return Collections.emptyList();
+    }
 }
 
-@Component
+/*@Component
 class AlbumsFallbackFactory implements FallbackFactory<AlbumsServiceClient> {
 
     @Override
@@ -46,4 +50,4 @@ class AlbumsServiceClientFallBack implements AlbumsServiceClient {
         }
         return Collections.emptyList();
     }
-}
+}*/
