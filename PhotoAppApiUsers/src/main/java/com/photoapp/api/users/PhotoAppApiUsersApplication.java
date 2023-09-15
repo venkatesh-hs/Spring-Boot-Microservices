@@ -6,6 +6,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.trace.http.HttpTraceRepository;
 import org.springframework.boot.actuate.trace.http.InMemoryHttpTraceRepository;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.openfeign.EnableFeignClients;
@@ -34,8 +35,8 @@ public class PhotoAppApiUsersApplication {
 
 	@Bean
 	@LoadBalanced
-	public RestTemplate getRestTemplate() {
-		return new RestTemplate();
+	public RestTemplate getRestTemplate(RestTemplateBuilder builder) {
+		return builder.build();
 	}
 
 	@Bean

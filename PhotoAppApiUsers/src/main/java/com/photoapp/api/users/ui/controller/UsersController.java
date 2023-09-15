@@ -43,10 +43,6 @@ public class UsersController {
     private Environment env;
 
     @Autowired
-    private AlbumsServiceClient albumsServiceClient;
-    //private RestTemplate restTemplate;
-
-    @Autowired
     UsersService usersService;
 
     public UsersController() {
@@ -72,22 +68,6 @@ public class UsersController {
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseModel> getUser(@PathVariable("id") String userId) throws Throwable {
         UserDto user = usersService.getUserById(userId);
-
-        //Below commented is the usage of Rest Template to communicate with the other MicroServices
-        /*String albumsUrl = String.format(Objects.requireNonNull(env.getProperty("albums.url")), userId);
-        ResponseEntity<List<AlbumResponseModel>> albumsResponseList = restTemplate.exchange(albumsUrl, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
-        });
-        List<AlbumResponseModel> albums = albumsResponseList.getBody();
-        */
-
-        //Usage of Feign client
-        List<AlbumResponseModel> albums = albumsServiceClient.getAlbums(userId);
-        /*try {
-            albums = albumsServiceClient.getAlbums(userId);
-        } catch (FeignException e) {
-            log.error(e.getMessage());
-        }*/
-        user.setAlbums(albums);
         return ResponseEntity.ok().body(
                 new ModelMapper().map(user, UserResponseModel.class)
         );

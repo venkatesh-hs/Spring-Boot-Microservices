@@ -1,29 +1,46 @@
 package com.photoapp.api.users.service;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
+import com.photoapp.api.users.data.AlbumsServiceClient;
 import com.photoapp.api.users.data.UserEntity;
 import com.photoapp.api.users.data.UsersRepository;
 import com.photoapp.api.users.shared.UserDto;
+import com.photoapp.api.users.ui.model.AlbumResponseModel;
+import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
+@Slf4j
 public class UsersServiceImpl implements UsersService {
 
 	UsersRepository usersRepository;
 	BCryptPasswordEncoder bCryptPasswordEncoder;
+	@Autowired
+	private AlbumsServiceClient albumsServiceClient;
+
+	@Autowired
+	private RestTemplate restTemplate;
+
+	@Autowired
+	private Environment env;
 
 	@Autowired
 	public UsersServiceImpl(UsersRepository usersRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
@@ -66,7 +83,26 @@ public class UsersServiceImpl implements UsersService {
 		Optional<UserEntity> userEntity = Optional.ofNullable(usersRepository.findByUserId(userId));
 		if (userEntity.isEmpty())
 			throw new UsernameNotFoundException(String.valueOf(userId));
-        return new ModelMapper().map(userEntity.get(), UserDto.class);
+		UserDto userDto = new ModelMapper().map(userEntity.get(), UserDto.class);
+
+		//Below commented is the usage of Rest Template to communicate with the other MicroServices
+        String albumsUrl = String.format(Objects.requireNonNull(env.getProperty("albums.url")), userId);
+        ResponseEntity<List<AlbumResponseModel>> albumsResponseList = restTemplate.exchange(albumsUrl, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+        });
+        List<AlbumResponseModel> albums = albumsResponseList.getBody();
+
+		//Usage of Feign client
+		log.debug("Before calling albums Microservice");
+		//List<AlbumResponseModel> albums = albumsServiceClient.getAlbums(userId);
+		log.debug("After calling albums Microservice");
+        /*try {
+            albums = albumsServiceClient.getAlbums(userId);
+        } catch (FeignException e) {
+            log.error(e.getMessage());
+        }*/
+		userDto.setAlbums(albums);
+
+        return new ModelMapper().map(userDto, UserDto.class);
     }
 
 }
