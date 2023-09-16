@@ -86,14 +86,14 @@ public class UsersServiceImpl implements UsersService {
 		UserDto userDto = new ModelMapper().map(userEntity.get(), UserDto.class);
 
 		//Below commented is the usage of Rest Template to communicate with the other MicroServices
-        String albumsUrl = String.format(Objects.requireNonNull(env.getProperty("albums.url")), userId);
+        /*String albumsUrl = String.format(Objects.requireNonNull(env.getProperty("albums.url")), userId);
         ResponseEntity<List<AlbumResponseModel>> albumsResponseList = restTemplate.exchange(albumsUrl, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
         });
-        List<AlbumResponseModel> albums = albumsResponseList.getBody();
+        List<AlbumResponseModel> albums = albumsResponseList.getBody();*/
 
 		//Usage of Feign client
 		log.debug("Before calling albums Microservice");
-		//List<AlbumResponseModel> albums = albumsServiceClient.getAlbums(userId);
+		List<AlbumResponseModel> albums = albumsServiceClient.getAlbums(userId);
 		log.debug("After calling albums Microservice");
         /*try {
             albums = albumsServiceClient.getAlbums(userId);

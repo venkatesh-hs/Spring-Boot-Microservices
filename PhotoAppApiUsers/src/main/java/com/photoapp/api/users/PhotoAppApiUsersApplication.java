@@ -1,5 +1,6 @@
 package com.photoapp.api.users;
 
+import brave.sampler.Sampler;
 import com.photoapp.api.users.shared.FeignErrorDecoder;
 import feign.Logger;
 import org.springframework.boot.SpringApplication;
@@ -47,6 +48,11 @@ public class PhotoAppApiUsersApplication {
 	@Bean
 	public FeignErrorDecoder getFeignErrorDecoder() {
 		return new FeignErrorDecoder();
+	}
+
+	@Bean
+	public Sampler alwaysSampler() {
+		return Sampler.ALWAYS_SAMPLE;
 	}
 
 }
